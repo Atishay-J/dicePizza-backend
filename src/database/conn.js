@@ -10,3 +10,5 @@ mongoose
   })
   .then(() => console.log("Database Connected"))
   .catch((err) => console.log("Error in connecting Database", err));
+
+// FOR THE PR ISSUE, WILL CLEAN LATER

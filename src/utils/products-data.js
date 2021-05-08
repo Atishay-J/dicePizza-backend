@@ -51,3 +51,5 @@ const data = [...Array(50)].map((item) => ({
 }));
 
 module.exports = data;
+
+// FOR THE PR ISSUE, WILL CLEAN LATER

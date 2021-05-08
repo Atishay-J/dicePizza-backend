@@ -51,3 +51,5 @@ export const data = [...Array(50)].map((item) => ({
     "https://bit.ly/3tnACa5",
   ]),
 }));
+
+// FOR THE PR ISSUE, WILL CLEAN LATER
