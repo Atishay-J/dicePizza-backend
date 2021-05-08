@@ -3,6 +3,7 @@ const app = express();
 const cors = require("cors");
 const fillProductsCollection = require("./utils/databaseInit");
 const productRouter = require("./routers/productRouter");
+const userRouter = require("./routers/usersRouter");
 
 require("dotenv").config();
 require("./database/conn");
@@ -10,6 +11,7 @@ require("./database/conn");
 app.use(cors());
 app.use(express.json());
 app.use("/api", productRouter);
+app.use(userRouter);
 
 //** To be used once for flooding product data **
 // fillProductsCollection();
