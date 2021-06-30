@@ -26,9 +26,9 @@ router.post("/login", async (req, res) => {
       }
     }
 
-    res.status(404).send("Not Found");
+    res.status(401).send("Not Found");
   } catch (err) {
-    res.status(404).send(err);
+    res.status(500).send(err);
   }
 });
 
