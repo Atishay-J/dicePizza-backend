@@ -106,9 +106,7 @@ router.post("/updatefavourites", async (req, res) => {
     let { userId, id, ...product } = req.body;
     let findUser = await Users.findById(userId);
     let alreadyFavourite = findUser.favourites.find((item) => item.id === id);
-    console.log("\n \n THissss\n ", userId, id);
     if (alreadyFavourite) {
-      console.log("\n \n Already favourite \n ", alreadyFavourite);
       await Users.updateOne(
         { _id: userId },
         { $pull: { favourites: { id: id } } }
