@@ -7,6 +7,12 @@ const Users = require("../../src/models/usersSchema");
 router.post("/signup", async (req, res) => {
   try {
     const { username, password } = req.body;
+    const isUsernameTaken = await Users.findOne(
+      { username: username } || { email: username }
+    );
+    if (isUsernameTaken) {
+      return res.status(404).send("username not available");
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const addUser = await new Users({ username, password: hashedPassword });
     const addedUser = await addUser.save();
@@ -20,7 +26,9 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
-    const foundUser = await Users.findOne({ username: username });
+    const foundUser = await Users.findOne(
+      { username: username } || { email: username }
+    );
 
     if (foundUser) {
       const isPasswordCorrect = await bcrypt.compare(
@@ -28,12 +36,69 @@ router.post("/login", async (req, res) => {
         foundUser.password
       );
 
+      const { address, cart, favourites, _id, username } = foundUser;
+
+      console.log("\n\n Found user\n", foundUser);
+
       return isPasswordCorrect
-        ? res.status(200).send("Authorised")
+        ? res.status(200).json({ address, cart, favourites, _id, username })
         : res.status(401).send("Unauthorised");
     }
 
     res.status(401).send("Not Found");
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+router.post("/addproduct", async (req, res) => {
+  try {
+    const { userId, ...product } = req.body;
+    console.log("\n \n Thingsgs\n", userId, "\n product \n", product);
+    const findUser = await Users.findById(userId);
+    findUser.cart.push({ ...product, qty: 1 });
+    findUser.save();
+    res.status(200).send("Product added");
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+router.post("/updateqty", async (req, res) => {
+  try {
+    const { userId, productId, qty, type } = req.body;
+
+    if (type === "DECREMENT" && qty <= 1) {
+      await Users.updateOne(
+        { _id: userId },
+        { $pull: { cart: { id: productId } } }
+      );
+
+      return res.status(200).send("Updated");
+    }
+
+    if (type === "DECREMENT") {
+      await Users.update(
+        { _id: userId, "cart.id": productId },
+        {
+          $set: {
+            "cart.$.qty": qty - 1,
+          },
+        }
+      );
+      res.status(200).send("Updated");
+    }
+    if (type === "INCREMENT") {
+      await Users.update(
+        { _id: userId, "cart.id": productId },
+        {
+          $set: {
+            "cart.$.qty": qty + 1,
+          },
+        }
+      );
+      res.status(200).send("Updated");
+    }
   } catch (err) {
     res.status(500).send(err);
   }
