@@ -38,8 +38,6 @@ router.post("/login", async (req, res) => {
 
       const { address, cart, favourites, _id, username } = foundUser;
 
-      console.log("\n\n Found user\n", foundUser);
-
       return isPasswordCorrect
         ? res.status(200).json({ address, cart, favourites, _id, username })
         : res.status(401).send("Unauthorised");
@@ -54,7 +52,6 @@ router.post("/login", async (req, res) => {
 router.post("/addproduct", async (req, res) => {
   try {
     const { userId, ...product } = req.body;
-    console.log("\n \n Thingsgs\n", userId, "\n product \n", product);
     const findUser = await Users.findById(userId);
     findUser.cart.push({ ...product, qty: 1 });
     findUser.save();
@@ -101,6 +98,28 @@ router.post("/updateqty", async (req, res) => {
     }
   } catch (err) {
     res.status(500).send(err);
+  }
+});
+
+router.post("/updatefavourites", async (req, res) => {
+  try {
+    let { userId, id, ...product } = req.body;
+    let findUser = await Users.findById(userId);
+    let alreadyFavourite = findUser.favourites.find((item) => item.id === id);
+    console.log("\n \n THissss\n ", userId, id);
+    if (alreadyFavourite) {
+      console.log("\n \n Already favourite \n ", alreadyFavourite);
+      await Users.updateOne(
+        { _id: userId },
+        { $pull: { favourites: { id: id } } }
+      );
+      return res.status(200).send("Updated");
+    }
+    findUser.favourites.push({ id, ...product });
+    findUser.save();
+    res.status(200).json({ userId, product, findUser, alreadyFavourite });
+  } catch (err) {
+    console.log("Error while updating favourites", err);
   }
 });
 
